@@ -21,6 +21,12 @@ namespace SkiServiceAPI
 
             services.AddControllers();
 
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+            });
+
             // Add CORS policy Port 5500
             //services.AddCors(options =>
             //{

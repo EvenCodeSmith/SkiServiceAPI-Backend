@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using SkiServiceAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace SkiServiceAPI.Controllers
 {
@@ -14,18 +16,23 @@ namespace SkiServiceAPI.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly SkiServiceDbContext _dbContext;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IConfiguration configuration, SkiServiceDbContext dbContext)
+        public AuthController(IConfiguration configuration, SkiServiceDbContext dbContext, ILogger<AuthController> logger)
         {
             _configuration = configuration;
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
+            _logger.LogInformation("Register request received for username: {Username}", user.Username);
+
             if (await _dbContext.Users.AnyAsync(u => u.Username == user.Username))
             {
+                _logger.LogWarning("Username {Username} already exists.", user.Username);
                 return BadRequest("Username already exists.");
             }
 
@@ -33,32 +40,33 @@ namespace SkiServiceAPI.Controllers
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
 
+            _logger.LogInformation("User {Username} registered successfully.", user.Username);
             return Ok("User registered successfully.");
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLogin userLogin)
         {
-            Console.WriteLine($"Login request received for username: {userLogin.Username}");
+            _logger.LogInformation("Login request received for username: {Username}", userLogin.Username);
 
             var user = _dbContext.Users
-                .FirstOrDefault(u => u.Username.ToLower() == userLogin.Username.ToLower()); 
+                .FirstOrDefault(u => u.Username.ToLower() == userLogin.Username.ToLower());
 
             if (user == null)
             {
-                Console.WriteLine("User not found in database.");
+                _logger.LogWarning("Login failed for username: {Username} - User not found.", userLogin.Username);
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            Console.WriteLine($"User found in database: {user.Username}");
+            _logger.LogInformation("User {Username} found in database. Verifying password...", user.Username);
 
             if (!BCrypt.Net.BCrypt.Verify(userLogin.Password, user.Password))
             {
-                Console.WriteLine("Password verification failed.");
+                _logger.LogWarning("Login failed for username: {Username} - Incorrect password.", user.Username);
                 return Unauthorized(new { message = "Invalid credentials" });
             }
 
-            Console.WriteLine("Password verification successful. Generating JWT token...");
+            _logger.LogInformation("Password verification successful for user {Username}. Generating JWT token...", user.Username);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
@@ -75,15 +83,10 @@ namespace SkiServiceAPI.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            Console.WriteLine("Generated JWT Token: " + tokenString);
+            _logger.LogInformation("JWT Token generated successfully for user {Username}.", user.Username);
 
             return Ok(new { Token = tokenString, Username = user.Username, message = "Login successful" });
-
         }
-
-
-
-
 
         private string GenerateJwtToken(string username)
         {
@@ -96,7 +99,10 @@ namespace SkiServiceAPI.Controllers
                 expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
-            return new JwtSecurityTokenHandler().WriteToken(token);
+
+            string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+            _logger.LogInformation("Generated JWT token for username: {Username}", username);
+            return tokenString;
         }
     }
 }
