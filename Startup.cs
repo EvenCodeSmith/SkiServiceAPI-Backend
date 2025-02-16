@@ -64,6 +64,9 @@ namespace SkiServiceAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkiService API", Version = "v1" });
             });
+
+            services.AddControllers()
+            .AddNewtonsoftJson();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -27,8 +27,8 @@ namespace SkiServiceAPI
 
             // Seed data
             modelBuilder.Entity<Order>().HasData(
-                new Order { Id = 1, Service = "Kleiner Service", Status = "Offen", Email = "customer1@example.com", Name = "Customer 1", Phone = "+1234567890", Priority = "Standard", PickupDate = "2025-01-10" },
-                new Order { Id = 2, Service = "Grosser Service", Status = "InArbeit", Email = "customer2@example.com", Name = "Customer 2", Phone = "+9876543210", Priority = "Express", PickupDate = "2025-01-12" }
+                new Order { Id = 1, Service = "Kleiner Service", Status = "Offen", Email = "customer1@example.com", Name = "Customer 1", Phone = "+1234567890", Priority = "Standard", PickupDate = "2025-01-10", Comment= "test" },
+                new Order { Id = 2, Service = "Grosser Service", Status = "InArbeit", Email = "customer2@example.com", Name = "Customer 2", Phone = "+9876543210", Priority = "Express", PickupDate = "2025-01-12"}
             );
 
             modelBuilder.Entity<User>().HasData(

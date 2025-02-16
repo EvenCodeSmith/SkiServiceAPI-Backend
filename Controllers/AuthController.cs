@@ -42,7 +42,7 @@ namespace SkiServiceAPI.Controllers
             Console.WriteLine($"Login request received for username: {userLogin.Username}");
 
             var user = _dbContext.Users
-                .FirstOrDefault(u => u.Username.ToLower() == userLogin.Username.ToLower()); // ✅ Case-insensitive matching
+                .FirstOrDefault(u => u.Username.ToLower() == userLogin.Username.ToLower()); 
 
             if (user == null)
             {

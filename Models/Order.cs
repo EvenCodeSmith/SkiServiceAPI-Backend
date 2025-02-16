@@ -11,6 +11,7 @@ namespace SkiServiceAPI.Models
         public string Service { get; set; }
         public string Priority { get; set; }
         public string PickupDate { get; set; }
+        public string? Comment { get; set; }
 
         [Required]
         public string Status { get; set; } = "Offen"; // Default value

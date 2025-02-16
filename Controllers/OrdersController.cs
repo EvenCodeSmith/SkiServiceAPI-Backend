@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -70,6 +71,40 @@ namespace SkiServiceAPI.Controllers
             }
 
             _context.Entry(order).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "Error updating order.");
+            }
+
+            return NoContent();
+        }
+
+        // PATCH: api/orders/{id}
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchOrder(int id, [FromBody] JsonPatchDocument<Order> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest("Invalid patch document.");
+            }
+
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            patchDoc.ApplyTo(order, ModelState);
+
+            if (!TryValidateModel(order))
+            {
+                return ValidationProblem(ModelState);
+            }
 
             try
             {

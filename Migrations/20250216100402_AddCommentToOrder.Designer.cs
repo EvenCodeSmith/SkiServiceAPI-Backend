@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkiServiceAPI;
 
@@ -10,9 +11,11 @@ using SkiServiceAPI;
 namespace SkiServiceAPI.Migrations
 {
     [DbContext(typeof(SkiServiceDbContext))]
-    partial class SkiServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250216100402_AddCommentToOrder")]
+    partial class AddCommentToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,6 +33,7 @@ namespace SkiServiceAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -82,6 +86,7 @@ namespace SkiServiceAPI.Migrations
                         new
                         {
                             Id = 2,
+                            Comment = "",
                             Email = "customer2@example.com",
                             Name = "Customer 2",
                             Phone = "+9876543210",
