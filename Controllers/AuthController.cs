@@ -28,12 +28,18 @@ namespace SkiServiceAPI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Registration failed due to invalid input.");
+                return BadRequest(ModelState);
+            }
+
             _logger.LogInformation("Register request received for username: {Username}", user.Username);
 
-            if (await _dbContext.Users.AnyAsync(u => u.Username == user.Username))
+            if (await _dbContext.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower()))
             {
-                _logger.LogWarning("Username {Username} already exists.", user.Username);
-                return BadRequest("Username already exists.");
+                _logger.LogWarning("Registration failed: Username {Username} is already taken.", user.Username);
+                return Conflict(new { message = "Username already exists." });
             }
 
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
@@ -43,6 +49,8 @@ namespace SkiServiceAPI.Controllers
             _logger.LogInformation("User {Username} registered successfully.", user.Username);
             return Ok("User registered successfully.");
         }
+
+
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLogin userLogin)
@@ -87,6 +95,23 @@ namespace SkiServiceAPI.Controllers
 
             return Ok(new { Token = tokenString, Username = user.Username, message = "Login successful" });
         }
+
+        // GET: api/auth/users
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            _logger.LogInformation("Fetching all registered users.");
+
+            var users = await _dbContext.Users
+                .Select(u => new { u.Id, u.Username }) // Passwort nicht mitgeben! - offensichtlich weshalb 
+                .ToListAsync();
+
+            _logger.LogInformation("Fetched {Count} users.", users.Count);
+
+            return Ok(users);
+        }
+
+
 
         private string GenerateJwtToken(string username)
         {

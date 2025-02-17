@@ -25,11 +25,21 @@ namespace SkiServiceAPI.Controllers
 
         // GET: api/orders
         [HttpGet]
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders([FromQuery] string priority = null)
         {
-            _logger.LogInformation("Fetching all orders");
-            var orders = await _context.Orders.ToListAsync();
+            _logger.LogInformation("Fetching orders{PriorityFilter}", !string.IsNullOrEmpty(priority) ? $" with priority {priority}" : "");
+
+            IQueryable<Order> query = _context.Orders;
+
+            if (!string.IsNullOrEmpty(priority))
+            {
+                query = query.Where(o => o.Priority.ToLower() == priority.ToLower());
+            }
+
+            var orders = await query.ToListAsync();
+
             _logger.LogInformation("Fetched {Count} orders from the database.", orders.Count);
+
             return Ok(orders);
         }
 
@@ -56,11 +66,11 @@ namespace SkiServiceAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid order model received.");
+                _logger.LogWarning("Order creation failed due to invalid input.");
                 return BadRequest(ModelState);
             }
 
-            _logger.LogInformation("Creating a new order for CustomerId: {CustomerId}", order.Id);
+            _logger.LogInformation("Creating a new order for {CustomerName} ({Email})", order.Name, order.Email);
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -68,6 +78,7 @@ namespace SkiServiceAPI.Controllers
             _logger.LogInformation("Order {OrderId} created successfully.", order.Id);
             return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
         }
+
 
         // PUT: api/orders/{id}
         [HttpPut("{id}")]

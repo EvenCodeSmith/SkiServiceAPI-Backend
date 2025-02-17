@@ -15,6 +15,15 @@ namespace SkiServiceAPI
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+           .IsUnique();
+
+            modelBuilder.Entity<User>()
+           .HasIndex(u => u.Password)
+           .IsUnique();
+
             base.OnModelCreating(modelBuilder);
 
             // Configure entity properties and relationships if needed
