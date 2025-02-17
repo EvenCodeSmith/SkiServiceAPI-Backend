@@ -1,0 +1,147 @@
+﻿using Xunit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SkiServiceAPI.Controllers;
+using SkiServiceAPI.Models;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using SkiServiceAPI;
+
+public class OrdersControllerTests
+{
+    private readonly OrdersController _controller;
+    private readonly SkiServiceDbContext _dbContext;
+
+    public OrdersControllerTests()
+    {
+        // Set up an in-memory database
+        var options = new DbContextOptionsBuilder<SkiServiceDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestOrdersDb")
+            .EnableSensitiveDataLogging() 
+            .Options;
+
+        _dbContext = new SkiServiceDbContext(options);
+
+        var logger = new LoggerFactory().CreateLogger<OrdersController>();
+
+        _controller = new OrdersController(_dbContext, logger);
+    }
+
+    [Fact]
+    public async Task GetOrders_ReturnsAllOrders()
+    {
+        // Arrange
+        _dbContext.Orders.AddRange(new List<Order>
+        {
+            new Order { Service = "Kleiner Service", Status = "Offen", Name = "Test1", Email = "test1@example.com", Phone = "+123456789", PickupDate = "2025-01-10", Priority = "Standard" },
+            new Order { Service = "Grosser Service", Status = "InArbeit", Name = "Test2", Email = "test2@example.com", Phone = "+987654321", PickupDate = "2025-01-12", Priority = "Express" }
+        });
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _controller.GetOrders();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var orders = Assert.IsType<List<Order>>(okResult.Value);
+        Assert.Equal(2, orders.Count);
+    }
+
+    [Fact]
+    public async Task CreateOrder_ValidOrder_ReturnsCreated()
+    {
+        // Arrange
+        var newOrder = new Order
+        {
+            Service = "Rennski-Service",
+            Status = "Offen",
+            Name = "Test",
+            Email = "test@example.com",
+            Phone = "+123456789",
+            PickupDate = "2025-01-15",
+            Priority = "Standard"
+        };
+
+        // Act
+        var result = await _controller.CreateOrder(newOrder);
+
+        // Assert
+        var createdAtResult = Assert.IsType<CreatedAtActionResult>(result);
+        var order = Assert.IsType<Order>(createdAtResult.Value);
+
+        Assert.Equal("Rennski-Service", order.Service);
+    }
+
+    [Fact]
+    public async Task UpdateOrder_OrderExists_ReturnsNoContent()
+    {
+        // Arrange
+        var order = new Order
+        {
+            Service = "Kleiner Service",
+            Status = "Offen",
+            Name = "Test",
+            Email = "test@example.com",
+            Phone = "+123456789",
+            PickupDate = "2025-01-10",
+            Priority = "Standard"
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync();
+
+       
+        int orderId = order.Id;
+
+        _dbContext.Entry(order).State = EntityState.Detached;
+
+        var updatedOrder = new Order
+        {
+            Id = orderId,
+            Service = "Grosser Service",
+            Status = "InArbeit",
+            Name = "Test",
+            Email = "test@example.com",
+            Phone = "+123456789",
+            PickupDate = "2025-01-12",
+            Priority = "Express"
+        };
+
+        // Act
+        var result = await _controller.UpdateOrder(orderId, updatedOrder);
+
+        // Assert
+        Assert.IsType<NoContentResult>(result);
+    }
+
+
+    [Fact]
+    public async Task DeleteOrder_OrderExists_ReturnsNoContent()
+    {
+        // Arrange
+        var order = new Order { Service = "Kleiner Service", Status = "Offen", Name = "Test", Email = "test@example.com", Phone = "+123456789", PickupDate = "2025-01-10", Priority = "Standard" };
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync();
+
+        // Get the auto-generated ID
+        int orderId = order.Id;
+
+        // Act
+        var result = await _controller.DeleteOrder(orderId);
+
+        // Assert
+        Assert.IsType<NoContentResult>(result);
+    }
+
+    [Fact]
+    public async Task DeleteOrder_OrderDoesNotExist_ReturnsNotFound()
+    {
+        // Act
+        var result = await _controller.DeleteOrder(99);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+}

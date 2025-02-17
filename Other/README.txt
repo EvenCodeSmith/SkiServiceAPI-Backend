@@ -1,0 +1,1 @@
+Ich hatte ein Problem mit den Unit Tests. Es funktioniert jedoch da ich den Test in diesen Ordner geholt habe ist alles auseinander gebrochen. Ich habe ihnen im "Test" Ordner lediglich den Code in einer txt Datei für die Unit Tests hinterlegt. Denn sonst würde der Compiler den Code laden wollen.

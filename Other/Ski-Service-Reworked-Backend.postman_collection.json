@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "fc3096df-3f2b-4a6a-b500-403dfe5d6109",
+		"name": "Ski-Service-Reworked-Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39644078"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"url": "http://localhost:5293/api/auth/register",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"testuser\", \"password\": \"password123\" }"
+				}
+			}
+		},
+		{
+			"name": "Login User",
+			"request": {
+				"method": "POST",
+				"url": "http://localhost:5293/api/auth/login",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"username\": \"testuser\", \"password\": \"password123\" }"
+				}
+			}
+		},
+		{
+			"name": "Get Orders",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "GET",
+				"url": "http://localhost:5293/api/orders"
+			}
+		},
+		{
+			"name": "Get Order By Id",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "GET",
+				"url": "http://localhost:5293/api/orders/1"
+			}
+		},
+		{
+			"name": "Create Order",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "POST",
+				"url": "http://localhost:5293/api/orders",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"name\": \"Customer X\", \"email\": \"customerx@example.com\", \"phone\": \"0762075933\", \"service\": \"Kleiner Service\", \"priority\": \"Standard\", \"pickupDate\": \"2025-02-14\", \"status\": \"Offen\" }"
+				}
+			}
+		},
+		{
+			"name": "Update Order",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "PUT",
+				"url": "http://localhost:5293/api/orders/1",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"id\": 1, \"name\": \"Customer Y\", \"email\": \"customerx@example.com\", \"phone\": \"0762075933\", \"service\": \"Rennski-Service\", \"priority\": \"Express\", \"pickupDate\": \"2025-02-15\", \"status\": \"InArbeit\" }"
+				}
+			}
+		},
+		{
+			"name": "Patch Order (Add Comment)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "PATCH",
+				"url": "http://localhost:5293/api/orders/1",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "[ { \"op\": \"replace\", \"path\": \"/comment\", \"value\": \"Updated comment text\" } ]"
+				}
+			}
+		},
+		{
+			"name": "Change Order Status",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "PATCH",
+				"url": "http://localhost:5293/api/orders/1",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": {
+					"mode": "raw",
+					"raw": "[ { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"Abgeschlossen\" } ]"
+				}
+			}
+		},
+		{
+			"name": "Delete Order",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": "http://localhost:5293/api/orders/1"
+			}
+		},
+		{
+			"name": "Get Users",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "GET",
+				"url": "http://localhost:5293/api/auth/users"
+			}
+		},
+		{
+			"name": "Get Me",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "GET",
+				"url": "http://localhost:5293/api/auth/me"
+			}
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": "http://localhost:5293/api/auth/users/1"
+			}
+		}
+	]
+}

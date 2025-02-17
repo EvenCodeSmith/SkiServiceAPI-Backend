@@ -140,6 +140,27 @@ namespace SkiServiceAPI.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = "Admin")] // Only admins can delete users
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            _logger.LogInformation("Attempting to delete user with ID: {UserId}", id);
+
+            var user = await _dbContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found.", id);
+                return NotFound(new { message = "User not found" });
+            }
+
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("User with ID {UserId} deleted successfully.", id);
+            return NoContent(); // 204 No Content
+        }
+
+
         private string GenerateJwtToken(string username)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
