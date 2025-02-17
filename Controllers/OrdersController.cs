@@ -90,23 +90,26 @@ namespace SkiServiceAPI.Controllers
 
         [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order order)
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order updatedOrder)
         {
             _logger.LogInformation("Updating order with ID: {OrderId}", id);
 
-            if (id != order.Id)
-            {
-                _logger.LogWarning("Order ID mismatch for ID: {OrderId}", id);
-                return BadRequest("Order ID mismatch.");
-            }
-
-            if (!await _context.Orders.AnyAsync(o => o.Id == id))
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
             {
                 _logger.LogWarning("Order with ID {OrderId} not found for update.", id);
                 return NotFound();
             }
 
-            _context.Entry(order).State = EntityState.Modified;
+            // Alle Felder aktualisieren
+            order.Name = updatedOrder.Name;
+            order.Email = updatedOrder.Email;
+            order.Phone = updatedOrder.Phone;
+            order.Service = updatedOrder.Service;
+            order.Priority = updatedOrder.Priority;
+            order.PickupDate = updatedOrder.PickupDate;
+            order.Comment = updatedOrder.Comment;
+            order.Status = updatedOrder.Status;
 
             try
             {
@@ -121,6 +124,7 @@ namespace SkiServiceAPI.Controllers
 
             return NoContent();
         }
+
 
         [Authorize(Roles = "Admin,Employee")]
         [HttpPatch("{id}")]
