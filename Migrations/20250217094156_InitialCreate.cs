@@ -18,12 +18,13 @@ namespace SkiServiceAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Service = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Priority = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PickupDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -38,7 +39,8 @@ namespace SkiServiceAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Password = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,21 +49,28 @@ namespace SkiServiceAPI.Migrations
 
             migrationBuilder.InsertData(
                 table: "Orders",
-                columns: new[] { "Id", "Email", "Name", "Phone", "PickupDate", "Priority", "Service", "Status" },
+                columns: new[] { "Id", "Comment", "Email", "Name", "Phone", "PickupDate", "Priority", "Service", "Status" },
                 values: new object[,]
                 {
-                    { 1, "customer1@example.com", "Customer 1", "+1234567890", "2025-01-10", "Standard", "Kleiner Service", "Offen" },
-                    { 2, "customer2@example.com", "Customer 2", "+9876543210", "2025-01-12", "Express", "Grosser Service", "InArbeit" }
+                    { 1, "test", "customer1@example.com", "Customer 1", "+1234567890", "2025-01-10", "Standard", "Kleiner Service", "Offen" },
+                    { 2, null, "customer2@example.com", "Customer 2", "+9876543210", "2025-01-12", "Express", "Grosser Service", "InArbeit" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Password", "Username" },
+                columns: new[] { "Id", "Password", "Role", "Username" },
                 values: new object[,]
                 {
-                    { 1, "password123", "admin" },
-                    { 2, "securepass", "employee1" }
+                    { 1, "password123", "Admin", "admin" },
+                    { 2, "securepass", "Employee", "employee1" },
+                    { 3, "securepass123!", "User", "User1" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />

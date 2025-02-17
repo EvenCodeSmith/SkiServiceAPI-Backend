@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SkiServiceAPI.Models;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SkiServiceAPI.Controllers
@@ -23,7 +24,7 @@ namespace SkiServiceAPI.Controllers
             _logger = logger;
         }
 
-        // GET: api/orders
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetOrders([FromQuery] string priority = null)
         {
@@ -37,13 +38,12 @@ namespace SkiServiceAPI.Controllers
             }
 
             var orders = await query.ToListAsync();
-
             _logger.LogInformation("Fetched {Count} orders from the database.", orders.Count);
 
             return Ok(orders);
         }
 
-        // GET: api/orders/{id}
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
@@ -56,11 +56,20 @@ namespace SkiServiceAPI.Controllers
                 return NotFound();
             }
 
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var username = User.Identity.Name;
+
+            if (userRole == "User" && order.Name != username)
+            {
+                _logger.LogWarning("Unauthorized access attempt by user {Username} for order {OrderId}", username, id);
+                return Forbid();
+            }
+
             _logger.LogInformation("Order with ID {OrderId} fetched successfully.", id);
             return Ok(order);
         }
 
-        // POST: api/orders
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
@@ -79,8 +88,7 @@ namespace SkiServiceAPI.Controllers
             return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
         }
 
-
-        // PUT: api/orders/{id}
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrder(int id, [FromBody] Order order)
         {
@@ -114,7 +122,7 @@ namespace SkiServiceAPI.Controllers
             return NoContent();
         }
 
-        // PATCH: api/orders/{id}
+        [Authorize(Roles = "Admin,Employee")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchOrder(int id, [FromBody] JsonPatchDocument<Order> patchDoc)
         {
@@ -155,7 +163,7 @@ namespace SkiServiceAPI.Controllers
             return NoContent();
         }
 
-        // DELETE: api/orders/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(int id)
         {

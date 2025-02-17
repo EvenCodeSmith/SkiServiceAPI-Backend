@@ -11,15 +11,15 @@ using SkiServiceAPI;
 namespace SkiServiceAPI.Migrations
 {
     [DbContext(typeof(SkiServiceDbContext))]
-    [Migration("20250217081525_SortByPriority2")]
-    partial class SortByPriority2
+    [Migration("20250217094906_IncreasePasswordFieldSize")]
+    partial class IncreasePasswordFieldSize
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -42,7 +42,8 @@ namespace SkiServiceAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -107,12 +108,19 @@ namespace SkiServiceAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.ToTable("Users");
 
@@ -121,13 +129,22 @@ namespace SkiServiceAPI.Migrations
                         {
                             Id = 1,
                             Password = "password123",
+                            Role = "Admin",
                             Username = "admin"
                         },
                         new
                         {
                             Id = 2,
                             Password = "securepass",
+                            Role = "Employee",
                             Username = "employee1"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Password = "securepass123!",
+                            Role = "User",
+                            Username = "User1"
                         });
                 });
 #pragma warning restore 612, 618

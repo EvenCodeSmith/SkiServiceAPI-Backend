@@ -16,7 +16,7 @@ namespace SkiServiceAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -39,7 +39,8 @@ namespace SkiServiceAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -102,7 +103,11 @@ namespace SkiServiceAPI.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -110,9 +115,6 @@ namespace SkiServiceAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Password")
-                        .IsUnique();
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -123,14 +125,23 @@ namespace SkiServiceAPI.Migrations
                         new
                         {
                             Id = 1,
-                            Password = "password123",
+                            Password = "$2b$10$6KHhXy0V7ptsvrSShn1jwOFFPzJC34SEErFE.Gneafyko3Fy58l32",
+                            Role = "Admin",
                             Username = "admin"
                         },
                         new
                         {
                             Id = 2,
-                            Password = "securepass",
+                            Password = "$2b$10$yU3fociY4o8fQFFQGEyoVujTqZAHECKt720ZiDAqub2l3ntzmMWDS",
+                            Role = "Employee",
                             Username = "employee1"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Password = "$2b$10$I//na1FtDHJtyWkdyZyu9.kEqOsMUC.k0i46tZ8Vbog9zYyt3eg0O",
+                            Role = "User",
+                            Username = "User1"
                         });
                 });
 #pragma warning restore 612, 618

@@ -20,9 +20,6 @@ namespace SkiServiceAPI
             .HasIndex(u => u.Username)
            .IsUnique();
 
-            modelBuilder.Entity<User>()
-           .HasIndex(u => u.Password)
-           .IsUnique();
 
             base.OnModelCreating(modelBuilder);
 
@@ -41,8 +38,9 @@ namespace SkiServiceAPI
             );
 
             modelBuilder.Entity<User>().HasData(
-                new User { Id = 1, Username = "admin", Password = "password123" },
-                new User { Id = 2, Username = "employee1", Password = "securepass" }
+                new User { Id = 1, Username = "admin", Password = "$2b$10$6KHhXy0V7ptsvrSShn1jwOFFPzJC34SEErFE.Gneafyko3Fy58l32", Role = "Admin" }, //Pwd:
+                new User { Id = 2, Username = "employee1", Password = "$2b$10$yU3fociY4o8fQFFQGEyoVujTqZAHECKt720ZiDAqub2l3ntzmMWDS", Role = "Employee" }, //Pwd:
+                new User { Id = 3, Username = "User1", Password = "$2b$10$I//na1FtDHJtyWkdyZyu9.kEqOsMUC.k0i46tZ8Vbog9zYyt3eg0O", Role = "User" } //Pwd: securepass123!
             );
         }
 
