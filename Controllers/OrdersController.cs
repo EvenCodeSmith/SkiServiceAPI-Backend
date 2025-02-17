@@ -182,5 +182,9 @@ namespace SkiServiceAPI.Controllers
             _logger.LogInformation("Order with ID {OrderId} deleted successfully.", id);
             return NoContent();
         }
+
+
     }
+
+
 }

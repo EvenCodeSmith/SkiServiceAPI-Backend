@@ -37,14 +37,12 @@ namespace SkiServiceAPI.Controllers
 
             _logger.LogInformation("Register request received for username: {Username}", user.Username);
 
-            // ✅ Ensure username is unique
             if (await _dbContext.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower()))
             {
                 _logger.LogWarning("Registration failed: Username {Username} is already taken.", user.Username);
                 return Conflict(new { message = "Username already exists." });
             }
 
-            // ✅ Ensure only valid roles are allowed
             string[] validRoles = { "Admin", "Employee", "User" };
             if (!validRoles.Contains(user.Role))
             {
@@ -100,7 +98,6 @@ namespace SkiServiceAPI.Controllers
             return Ok(new { Token = tokenString, Username = user.Username, Role = user.Role, message = "Login successful" });
         }
 
-        // ✅ Only Admins can fetch all users
         [Authorize(Roles = "Admin")]
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
@@ -131,7 +128,7 @@ namespace SkiServiceAPI.Controllers
 
             var user = await _dbContext.Users
                 .Where(u => u.Username.ToLower() == username.ToLower())
-                .Select(u => new { u.Id, u.Username, u.Role, u.Password }) 
+                .Select(u => new { u.Id, u.Username, u.Role}) 
                 .FirstOrDefaultAsync();
 
             if (user == null)
@@ -159,5 +156,7 @@ namespace SkiServiceAPI.Controllers
             _logger.LogInformation("Generated JWT token for username: {Username}", username);
             return tokenString;
         }
+
+
     }
 }
